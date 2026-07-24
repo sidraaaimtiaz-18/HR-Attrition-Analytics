@@ -1,0 +1,14 @@
+/*
+=====================================================
+Database Creation
+=====================================================
+
+Project Platform:
+Google BigQuery
+
+Dataset Name:
+HR_Attrition
+
+The dataset was created in Google BigQuery, and the
+cleaned CSV files were imported into this dataset.
+*/ 

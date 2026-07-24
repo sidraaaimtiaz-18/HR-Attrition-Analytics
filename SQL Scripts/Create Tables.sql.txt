@@ -1,0 +1,24 @@
+/*
+=====================================================
+HR Attrition Analytics Project
+Table Creation
+=====================================================
+
+This project was developed using Google BigQuery.
+
+Instead of manually creating tables with CREATE TABLE
+statements, the cleaned CSV files were imported directly
+into BigQuery.
+
+BigQuery automatically generated the table schema based
+on the CSV column names and data types.
+
+Imported Tables:
+
+1. employee_data
+2. attrition_data
+3. Job_detail
+4. exp_data
+
+EmployeeNumber is used as the key to join all tables.
+*/

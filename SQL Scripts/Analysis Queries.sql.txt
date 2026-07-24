@@ -1,0 +1,431 @@
+/*
+=========================================================
+HR Attrition Analytics Project
+Analysis Queries
+Author: Sidra Imtiaz
+
+Description:
+This file contains SQL queries used to analyze employee
+attrition using Google BigQuery.
+
+The analysis focuses on employee demographics,
+department performance, salary trends, work-life balance,
+job satisfaction, overtime impact, and attrition metrics.
+=========================================================
+*/
+
+---------------------------------------------------------
+-- SECTION 1 : DATA EXPLORATION
+---------------------------------------------------------
+
+-- View Job Details Table
+SELECT *
+FROM `portfolio-projects-495215.HR_Attirion.Job_detail`;
+
+-- View Attrition Table
+SELECT *
+FROM `portfolio-projects-495215.HR_Attirion.attrition_data`;
+
+-- View Employee Table
+SELECT *
+FROM `portfolio-projects-495215.HR_Attirion.employee_data`;
+
+-- View Experience Table
+SELECT *
+FROM `portfolio-projects-495215.HR_Attirion.exp_data`;
+
+
+
+---------------------------------------------------------
+-- SECTION 2 : KEY PERFORMANCE INDICATORS (KPIs)
+---------------------------------------------------------
+
+-- Total Number of Employees
+
+SELECT
+COUNT(*) AS Total_Employees
+FROM `portfolio-projects-495215.HR_Attirion.employee_data`;
+
+-- Business Insight:
+-- Calculates the total number of employees in the organization.
+
+
+---------------------------------------------------------
+
+-- Total Attrition Count
+
+SELECT
+COUNT(*) AS Attrition_Count
+FROM `portfolio-projects-495215.HR_Attirion.attrition_data`
+WHERE Attrition = TRUE;
+
+-- Business Insight:
+-- Calculates the total number of employees who left the company.
+
+
+---------------------------------------------------------
+
+-- Overall Attrition Rate
+
+SELECT
+
+ROUND(
+SUM(CASE WHEN Attrition = TRUE THEN 1 ELSE 0 END)
+*100/
+COUNT(*),2
+) AS Attrition_Rate
+
+FROM `portfolio-projects-495215.HR_Attirion.attrition_data`;
+
+-- Business Insight:
+-- Calculates the percentage of employees who left the company.
+
+
+
+---------------------------------------------------------
+-- SECTION 3 : EMPLOYEE ANALYSIS
+---------------------------------------------------------
+
+-- Employee Count by Department
+
+SELECT
+
+Department,
+COUNT(*) AS Total_Employees
+
+FROM `portfolio-projects-495215.HR_Attirion.employee_data`
+
+GROUP BY Department
+
+ORDER BY Total_Employees DESC;
+
+-- Business Insight:
+-- Identifies departments with the highest workforce.
+
+
+
+---------------------------------------------------------
+-- SECTION 4 : DEPARTMENT ATTRITION ANALYSIS
+---------------------------------------------------------
+
+-- Employees and Attrition by Department
+
+SELECT
+
+Department,
+
+COUNT(*) AS Total_Employees,
+
+SUM(CASE WHEN Attrition = TRUE THEN 1 ELSE 0 END)
+AS Employees_Left
+
+FROM `portfolio-projects-495215.HR_Attirion.employee_data` e
+
+JOIN `portfolio-projects-495215.HR_Attirion.attrition_data` a
+
+ON e.EmployeeNumber = a.EmployeeNumber
+
+GROUP BY Department;
+
+-- Business Insight:
+-- Compares department size with the number of employees who left.
+
+
+
+---------------------------------------------------------
+
+-- Attrition Rate by Department
+
+SELECT
+
+Department,
+
+ROUND(
+
+SUM(CASE WHEN Attrition = TRUE THEN 1 ELSE 0 END)
+*100/
+COUNT(*),2
+
+) AS Attrition_Rate
+
+FROM `portfolio-projects-495215.HR_Attirion.employee_data` e
+
+JOIN `portfolio-projects-495215.HR_Attirion.attrition_data` a
+
+ON e.EmployeeNumber = a.EmployeeNumber
+
+GROUP BY Department
+
+ORDER BY Attrition_Rate DESC;
+
+-- Business Insight:
+-- Identifies departments experiencing the highest attrition.
+
+
+
+---------------------------------------------------------
+-- SECTION 5 : OVERTIME ANALYSIS
+---------------------------------------------------------
+
+SELECT
+
+OverTime,
+
+COUNT(*) AS Total_Employees,
+
+SUM(CASE WHEN Attrition = TRUE THEN 1 ELSE 0 END)
+AS Employees_Left
+
+FROM `portfolio-projects-495215.HR_Attirion.Job_detail` j
+
+JOIN `portfolio-projects-495215.HR_Attirion.attrition_data` a
+
+ON j.EmployeeNumber = a.EmployeeNumber
+
+GROUP BY OverTime;
+
+-- Business Insight:
+-- Evaluates whether overtime contributes to employee attrition.
+
+
+
+---------------------------------------------------------
+-- SECTION 6 : SALARY ANALYSIS
+---------------------------------------------------------
+
+-- Average Salary by Department
+
+SELECT
+
+Department,
+
+ROUND(AVG(MonthlyIncome),2) AS Average_Salary
+
+FROM `portfolio-projects-495215.HR_Attirion.employee_data` e
+
+JOIN `portfolio-projects-495215.HR_Attirion.Job_detail` j
+
+ON e.EmployeeNumber = j.EmployeeNumber
+
+GROUP BY Department
+
+ORDER BY Average_Salary DESC;
+
+-- Business Insight:
+-- Compares average salary across departments.
+
+
+
+---------------------------------------------------------
+
+-- Salary Comparison by Attrition Status
+
+SELECT
+
+Attrition,
+
+ROUND(AVG(MonthlyIncome),2) AS Average_Salary
+
+FROM `portfolio-projects-495215.HR_Attirion.attrition_data` a
+
+JOIN `portfolio-projects-495215.HR_Attirion.Job_detail` j
+
+ON a.EmployeeNumber = j.EmployeeNumber
+
+GROUP BY Attrition;
+
+-- Business Insight:
+-- Compares average salary of employees who stayed versus those who left.
+
+
+
+---------------------------------------------------------
+-- SECTION 7 : EMPLOYEE SATISFACTION
+---------------------------------------------------------
+
+-- Job Satisfaction Analysis
+
+SELECT
+
+JobSatisfaction,
+
+COUNT(*) AS Total_Employees,
+
+SUM(CASE WHEN Attrition = TRUE THEN 1 ELSE 0 END)
+AS Employees_Left
+
+FROM `portfolio-projects-495215.HR_Attirion.attrition_data`
+
+GROUP BY JobSatisfaction
+
+ORDER BY JobSatisfaction;
+
+-- Business Insight:
+-- Examines how job satisfaction influences employee attrition.
+
+
+
+---------------------------------------------------------
+
+-- Work-Life Balance Analysis
+
+SELECT
+
+WorkLifeBalance,
+
+SUM(CASE WHEN Attrition = TRUE THEN 1 ELSE 0 END)
+AS Employees_Left
+
+FROM `portfolio-projects-495215.HR_Attirion.attrition_data`
+
+GROUP BY WorkLifeBalance
+
+ORDER BY WorkLifeBalance;
+
+-- Business Insight:
+-- Evaluates whether poor work-life balance contributes to attrition.
+
+
+
+---------------------------------------------------------
+-- SECTION 8 : EXPERIENCE ANALYSIS
+---------------------------------------------------------
+
+SELECT
+
+Attrition,
+
+ROUND(AVG(TotalWorkingYears),2)
+AS Average_Working_Years
+
+FROM `portfolio-projects-495215.HR_Attirion.exp_data` e
+
+JOIN `portfolio-projects-495215.HR_Attirion.attrition_data` a
+
+ON e.EmployeeNumber = a.EmployeeNumber
+
+GROUP BY Attrition;
+
+-- Business Insight:
+-- Compares average work experience between employees who stayed and those who left.
+
+
+
+---------------------------------------------------------
+-- SECTION 9 : JOB ROLE ANALYSIS
+---------------------------------------------------------
+
+-- Highest Paying Job Roles
+
+SELECT
+
+JobRole,
+
+ROUND(AVG(MonthlyIncome),2)
+AS Average_Salary
+
+FROM `portfolio-projects-495215.HR_Attirion.Job_detail`
+
+GROUP BY JobRole
+
+ORDER BY Average_Salary DESC;
+
+-- Business Insight:
+-- Identifies job roles with the highest average salary.
+
+
+
+---------------------------------------------------------
+
+-- Job Roles with Highest Attrition
+
+SELECT
+
+JobRole,
+
+SUM(CASE WHEN Attrition = TRUE THEN 1 ELSE 0 END)
+AS Employees_Left
+
+FROM `portfolio-projects-495215.HR_Attirion.Job_detail` j
+
+JOIN `portfolio-projects-495215.HR_Attirion.attrition_data` a
+
+ON j.EmployeeNumber = a.EmployeeNumber
+
+GROUP BY JobRole
+
+ORDER BY Employees_Left DESC;
+
+-- Business Insight:
+-- Identifies job roles experiencing the highest employee turnover.
+
+
+
+---------------------------------------------------------
+-- SECTION 10 : GENDER ANALYSIS
+---------------------------------------------------------
+
+SELECT
+
+Gender,
+
+SUM(CASE WHEN Attrition = TRUE THEN 1 ELSE 0 END)
+AS Employees_Left
+
+FROM `portfolio-projects-495215.HR_Attirion.employee_data` e
+
+JOIN `portfolio-projects-495215.HR_Attirion.attrition_data` a
+
+ON e.EmployeeNumber = a.EmployeeNumber
+
+GROUP BY Gender;
+
+-- Business Insight:
+-- Compares employee attrition across genders.
+
+
+
+---------------------------------------------------------
+-- SECTION 11 : COMPLETE EMPLOYEE ANALYSIS
+---------------------------------------------------------
+
+SELECT
+
+e.EmployeeNumber,
+
+Gender,
+
+Department,
+
+JobRole,
+
+MonthlyIncome,
+
+OverTime,
+
+Attrition,
+
+JobSatisfaction,
+
+TotalWorkingYears,
+
+YearsAtCompany
+
+FROM `portfolio-projects-495215.HR_Attirion.employee_data` e
+
+JOIN `portfolio-projects-495215.HR_Attirion.Job_detail` j
+
+ON e.EmployeeNumber = j.EmployeeNumber
+
+JOIN `portfolio-projects-495215.HR_Attirion.attrition_data` a
+
+ON e.EmployeeNumber = a.EmployeeNumber
+
+JOIN `portfolio-projects-495215.HR_Attirion.exp_data` ex
+
+ON e.EmployeeNumber = ex.EmployeeNumber;
+
+-- Business Insight:
+-- Produces a consolidated employee dataset by joining all tables.
+-- This query is useful for dashboard creation, further analysis,
+-- and exporting a comprehensive employee dataset.
